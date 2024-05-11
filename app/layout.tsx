@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { AntdRegistry } from "@ant-design/nextjs-registry";
 import "./globals.css";
+import GlobalStyleProvider from "./providers/GlobalStyleProvider";
+import { ClerkProvider, auth } from "@clerk/nextjs";
+import ContextProvider from "./providers/ContextProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -14,9 +18,23 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { userId } = auth();
+
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body className={inter.className}>
+          <AntdRegistry>
+            {userId ? (
+              <ContextProvider>
+                <GlobalStyleProvider>{children}</GlobalStyleProvider>
+              </ContextProvider>
+            ) : (
+              <div className="h-screen">{children}</div>
+            )}
+          </AntdRegistry>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
